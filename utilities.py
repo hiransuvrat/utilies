@@ -3,8 +3,15 @@ from csv import DictReader
 
 
 #Converts csv file to vw format
-def csvToVw(csvFile, outFile, numericalList, categoricalList, namespace, label, idCol, isTrain):
+def csvToVw(csvFile, outFile, numericalList, categoricalList, namespace, label, idCol, isTrain, smoothing = [], smoothingPrefix = 'smoothies'):
+  smoothFields = {}
+  for fields in smoothing:
+    smoothFields[fields] = {}
+    for e, line in enumerate( open("%s_%s" % (smoothingPrefix, fields) ) ):
+      val = line.split(",")
+      smoothFields[fields][val[0]] = val[1]
 
+  print 'Read smoothing fields'
   with open(outFile,"wb") as outfile:
     for e, row in enumerate( DictReader(open(csvFile)) ):
       features = ""
@@ -18,6 +25,11 @@ def csvToVw(csvFile, outFile, numericalList, categoricalList, namespace, label, 
             features += " |%s %s_%s" % (name, k, v)
           elif k in numericalList:
             features += " |%s %s:%s" % (name, k, v)
+          elif k in smoothing:
+            try:
+              features += " |%s %s:%s" % (name, k, smoothFields[k][v].strip())
+            except KeyError:
+              features += " |%s %s:.25" % (name, k)
 
       if isTrain: 
         outfile.write( "%s '%s %s\n" % (row[label], row[idCol],features) )
@@ -94,6 +106,8 @@ def dumpSmoothies(csvFile, outFilePrefix, fields, alpha = 300, beta = 75, label 
 
 #csvToVw("test.csv", "test.vw", ['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13'],['C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13','C14','C15','C16','C17','C18','C19','C20','C21','C22','C23','C24','C25','C26'],{'I1':'i','I2':'i','I3':'i','I4':'i','I5':'i','I6':'i','I7':'i','I8':'i','I9':'i','I10':'i','I11':'i','I12':'i','I13':'i','C1':'c','C2':'c','C3':'c','C4':'c','C5':'c','C6':'c','C7':'c','C8':'c','C9':'c','C10':'c','C11':'c','C12':'c'}, "Label", "Id", True)
 
+csvToVw("/mnt/crit/test2.csv", "/mnt/crit/test2.vw", ['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13', 'I14'],['C1','C2','C5','C6','C7','C8','C9','C11','C13','C14','C15','C17','C18','C19','C20','C22','C23','C25'],{'I1':'i','I2':'i','I3':'i','I4':'i','I5':'i','I6':'i','I7':'i','I8':'i','I9':'i','I10':'i','I11':'i','I12':'i','I13':'i','C1':'c','C2':'c','C3':'c','C4':'c','C5':'c','C6':'c','C7':'c','C8':'c','C9':'c','C10':'c','C11':'c','C12':'c'}, "Label", "Id", False, ['C3','C4','C10','C12','C16','C21','C24'])
+
 #csvToLibSVM("/mnt/crit/train2.csv", "/mnt/crit/train.svm", ['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13'],['C1','C2','C5','C6','C8','C9','C13','C14','C17','C18','C19','C20','C22','C23','C25'], "Label", True)
 
-dumpSmoothies("/mnt/crit/train.csv", "smoothies", ['C3', 'C4', 'C10', 'C12', 'C16', 'C21','C24', 'C28'])
+#dumpSmoothies("/mnt/crit/train.csv", "smoothies", ['C3', 'C4', 'C10', 'C12', 'C16', 'C21','C24', 'C26'])
