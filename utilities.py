@@ -40,6 +40,38 @@ def csvToVw(csvFile, outFile, numericalList, categoricalList, namespace, label, 
       if e % 1000000 == 0:
         print("%s"%(e))
 
+#Subtitute avg values in csv files
+def csvToSmoothedCSV(csvFile, outFile, numericalList, smoothing = [], smoothingPrefix = 'smoothies'):
+  smoothFields = {}
+  for fields in smoothing:
+    smoothFields[fields] = {}
+    for e, line in enumerate( open("%s_%s" % (smoothingPrefix, fields) ) ):
+      val = line.split(",")
+      smoothFields[fields][val[0]] = val[1]
+
+  print 'Read smoothing fields'
+  with open(outFile,"wb") as outfile:
+    for e, row in enumerate( DictReader(open(csvFile)) ):
+      if e == 0:
+        features = ''
+        for k,v in row.items():
+          features += "%s," % (k)
+        outfile.write( "%s\n" % (features) ) 
+      features = ''
+      for k,v in row.items():
+        if k in numericalList:
+          features += "%s," % (v)
+        elif k in smoothing:
+          try:
+            features += "%s," % (smoothFields[k][v].strip())
+          except KeyError:
+            features += ".25," 
+
+    outfile.write( "%s\n" % (features) )
+      
+      if e % 1000000 == 0:
+        print("%s"%(e))
+
 #Converts csv to libsvm format
 def csvToLibSVM(csvFile, outFile, numericalList, categoricalList, label, isTrain, smoothing = [], smoothingPrefix = 'smoothies'):
   smoothFields = {}
