@@ -56,6 +56,7 @@ def csvToSmoothedCSV(csvFile, outFile, numericalList, smoothing = [], smoothingP
         features = ''
         for k,v in row.items():
           features += "%s," % (k)
+        features = features[:-1]
         outfile.write( "%s\n" % (features) ) 
       features = ''
       for k,v in row.items():
@@ -63,12 +64,11 @@ def csvToSmoothedCSV(csvFile, outFile, numericalList, smoothing = [], smoothingP
           features += "%s," % (v)
         elif k in smoothing:
           try:
-            features += "%s," % (smoothFields[k][v].strip())
+            features += "%s," % (smoothFields[k][v].strip()[:5])
           except KeyError:
             features += ".25," 
-
-    outfile.write( "%s\n" % (features) )
-      
+      features = features[:-1]
+      outfile.write( "%s\n" % (features) )
       if e % 1000000 == 0:
         print("%s"%(e))
 
@@ -154,7 +154,7 @@ def dumpSmoothies(csvFile, outFilePrefix, fields, alpha = 300, beta = 75, label 
 
 #csvToVw("test.csv", "test.vw", ['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13'],['C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13','C14','C15','C16','C17','C18','C19','C20','C21','C22','C23','C24','C25','C26'],{'I1':'i','I2':'i','I3':'i','I4':'i','I5':'i','I6':'i','I7':'i','I8':'i','I9':'i','I10':'i','I11':'i','I12':'i','I13':'i','C1':'c','C2':'c','C3':'c','C4':'c','C5':'c','C6':'c','C7':'c','C8':'c','C9':'c','C10':'c','C11':'c','C12':'c'}, "Label", "Id", True)
 
-csvToVw("/mnt/crit/train2.csv", "/mnt/crit/train2.vw", ['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13', 'I14'],['C6','C9','C14', 'C17','C20', 'C22','C23','C25'],{'I1':'i','I2':'i','I3':'i','I4':'i','I5':'i','I6':'i','I7':'i','I8':'i','I9':'i','I10':'i','I11':'i','I12':'i','I13':'i','C1':'c','C2':'c','C3':'c','C4':'c','C5':'c','C6':'j','C7':'c','C8':'c','C9':'k','C10':'c','C11':'c','C12':'c', 'C14':'l', 'C20':'e', 'C23':'f', 'C25':'g', 'I14':'h'}, "Label", "Id", True, ['C1', 'C2', 'C3','C4', 'C5', 'C7', 'C8', 'C10', 'C11', 'C12', 'C13', 'C15', 'C16', 'C18', 'C19', 'C21','C24', 'C26'])
+#csvToVw("/mnt/crit/train2.csv", "/mnt/crit/train2.vw", ['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13', 'I14'],['C6','C9','C14', 'C17','C20', 'C22','C23','C25'],{'I1':'i','I2':'i','I3':'i','I4':'i','I5':'i','I6':'i','I7':'i','I8':'i','I9':'i','I10':'i','I11':'i','I12':'i','I13':'i','C1':'c','C2':'c','C3':'c','C4':'c','C5':'c','C6':'j','C7':'c','C8':'c','C9':'k','C10':'c','C11':'c','C12':'c', 'C14':'l', 'C20':'e', 'C23':'f', 'C25':'g', 'I14':'h'}, "Label", "Id", True, ['C1', 'C2', 'C3','C4', 'C5', 'C7', 'C8', 'C10', 'C11', 'C12', 'C13', 'C15', 'C16', 'C18', 'C19', 'C21','C24', 'C26'])
 
 #csvToVw("test.csv", "test.vw", ['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13'],['C6','C9','C14', 'C17','C20', 'C22','C23','C25'],{'I1':'i','I2':'i','I3':'i','I4':'i','I5':'i','I6':'i','I7':'i','I8':'i','I9':'i','I10':'i','I11':'i','I12':'i','I13':'i','C1':'c','C2':'c','C3':'c','C4':'c','C5':'c','C6':'a','C7':'c','C8':'c','C9':'b','C10':'c','C11':'c','C12':'c', 'C14':'d', 'C20':'e', 'C23':'f', 'C25':'g'}, "Label", "Id", True, ['C1', 'C2', 'C3','C4', 'C5', 'C7', 'C8', 'C10', 'C11', 'C12', 'C13', 'C15', 'C16', 'C18', 'C19', 'C21','C24', 'C26'])
 
@@ -163,3 +163,5 @@ csvToVw("/mnt/crit/train2.csv", "/mnt/crit/train2.vw", ['I1','I2','I3','I4','I5'
 #dumpSmoothies("/mnt/crit/train.csv", "smoothies", ['C3', 'C4', 'C10', 'C12', 'C16', 'C21','C24', 'C26'])
 
 #dumpSmoothies("/mnt/crit/train.csv", "smoothies", ['C1', 'C2', 'C5', 'C7', 'C8', 'C11','C13', 'C15', 'C17', 'C18', 'C19', 'C26'])
+
+csvToSmoothedCSV('../test.csv', '../testSmooth.csv',['I1','I2','I3','I4','I5','I6','I7','I8','I9','I10','I11','I12','I13', 'Id', 'Label'], ['C1','C2','C3','C4','C5','C6','C7','C8','C9','C10','C11','C12','C13','C14','C15','C16','C17','C18','C19','C20','C21','C22','C23','C24','C25','C26'], smoothingPrefix = 'smoothies')
