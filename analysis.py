@@ -44,9 +44,6 @@ def fillna(data, typeSub = 'mean', fields = [], constantVal = -1):
 
 #Fill NaNs from dict
 def fillnaDict(data, fields):
-    if len(fields) == 0:
-        fields = data.dtype.names
-    
     for field in fields:
         indices = np.where(np.isnan(data[field])) 
         data[field][indices] = fields[field]
