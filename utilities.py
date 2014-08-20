@@ -161,7 +161,6 @@ def prepDataTrain(data, label = 'Label', fields = [], split = True, splitPercent
 
   if len(fields) == 0:
     fields = data.dtype.names
-  
   if shuffle:
     np.random.shuffle(data)
     print 'Shuffled'
@@ -173,7 +172,7 @@ def prepDataTrain(data, label = 'Label', fields = [], split = True, splitPercent
 
   fillVal = {}
   if fillna:
-    data, fillVal = analysis.fillna(data, typeSub = typeSub, fields = [], constantVal = -1)
+    data, fillVal = analysis.fillna(data, typeSub, fields, -1)
     if split:
       test = analysis.fillnaDict(test, fillVal)
     print 'Filled NaN'
@@ -204,9 +203,8 @@ def prepDataTrain(data, label = 'Label', fields = [], split = True, splitPercent
       return data, [], features, {}
   
 
-def prepDataTest(data, fields = [], fillna = True, fillVal = {}, dump = False, dumpPrefix = 'set'):
+def prepDataTest(data, fields, fillna = True, fillVal = {}, dump = False, dumpPrefix = 'set'):
   data = data[fields]
-
   if fillna:
     data = analysis.fillnaDict(data, fillVal)
 
