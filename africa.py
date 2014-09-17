@@ -6,6 +6,7 @@ from sklearn import cross_validation
 import pandas as pd
 import sys
 import sklearn.feature_selection as fs
+import sklearn.svm as svm
 
 headersTest = np.genfromtxt(sys.argv[2], delimiter=',', names=True)
 
@@ -39,9 +40,14 @@ for target in targets:
     #Prepare data for training
     data = np.copy(data1)
     delList = np.array([])
+    clf = 0
+    print target
     for i in range(len(data)):
         if data[target][i] > (data[target].mean() + 2*data[target].std()) or data[target][i] < (data[target].mean() - 2*data[target].std()):
             delList = np.append(delList, i)
+    
+    #clf = linear.BayesianRidge(normalize=True, verbose=True, tol=.01)
+    clf = svm.SVR(C=10000.0)
     data = np.delete(data, delList, 0)
     data, testa, features, fillVal = util.prepDataTrain(data, target, featuresList, False, 10, False, True, 'mean', False, 'set')
     #sel = fs.SelectKBest(fs.f_regression, k=2000)
@@ -49,12 +55,12 @@ for target in targets:
     #data = np.array(sel.fit_transform(data[features].tolist(), data1[target]))
     #print data.shape
     #Use/tune your predictor
-    clf = linear.BayesianRidge(normalize=True, verbose=True, tol=.01)
+
     
     #scores = cross_validation.cross_val_score(clf, data[features].tolist(), data[target], cv=5, scoring='mean_squared_error')
     scores = np.array(cross_validation.cross_val_score(clf, data[features].tolist(), data[target], cv=5, scoring='mean_squared_error'))
     print (-1 * scores), (-1  * scores.sum()/5)
-    continue
+    #continue
     clf.fit(data[features].tolist(), data[target])
 
     #Prepare test data
