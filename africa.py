@@ -96,19 +96,18 @@ data1 = np.copy(data)
 test1 = np.copy(test)
 
 #Dependent/Target variables
-#targets = ['Ca','P','pH','SOC','Sand']
-targets = ['P']
+targets = ['Ca','P','pH','SOC','Sand']
+#targets = ['P']
 #Prepare empty result
 df = pd.DataFrame({"PIDN": ids, "Ca": test['PIDN'], "P": test['PIDN'], "pH": test['PIDN'], "SOC": test['PIDN'], "Sand": test['PIDN']})
 testa = 0
-             
+delFeatures = ['m2379.76','m2377.83','m2375.9','m2373.97','m2372.04','m2370.11','m2368.18','m2366.26','m2364.33','m2362.4','m2360.47','m2358.54','m2356.61','m2354.68','m2352.76']             
 for target in targets:
     data = np.copy(data1)
     test = np.copy(test1)
     #bs = cross_validation.Bootstrap(len(data), random_state=0)
-    print data[target][data[target] < 0].shape
-    data[target][data[target] >= 0] = 1
-    data[target][data[target] < 0] = 0
+    #data[target][data[target] >= 0] = 1
+    #data[target][data[target] < 0] = 0
 
     #Prepare data for training
     
@@ -125,46 +124,45 @@ for target in targets:
 
     #clf = linear.BayesianRidge(verbose=True, alpha_1=2, alpha_2=2, lambda_1=.01, lambda_2=.01, fit_intercept=True, compute_score=True)
     #clf = linear.BayesianRidge(verbose=True)
-    clf = tree.DecisionTreeRegressor(max_depth=3)
-    #clf = svm.SVR(C=10000.0, kernel='rbf', degree=1)
+    #clf = tree.DecisionTreeRegressor(max_depth=2)
+    clf = svm.SVR(C=10000.0, kernel='rbf', degree=1)
     data = np.delete(data, delList, 0)
     data, testa, features, fillVal = util.prepDataTrain(data, target, featuresList, False, 20, False, True, 'mean', False, 'set')
+    data = recfunctions.rec_drop_fields(data, delFeatures)
     #features = ['CTI','Depth', 'RELI', 'LSTN']
     #an.plotData(np.sqrt(1+data['P']), data['ELEV']*(-1*data['TMAP']))
     #data, clust, enc, newCol = clusterData(data, clusterFields, True)
     #testa, clust, enc, newCol = clusterData(testa, pickTest, True, enc, clust, False)
     #features = np.concatenate((features, newCol))
     
-    print data.shape
-
     #Use/tune your predictor
-    clf.fit(data[features].tolist(), data[target])
-    import pydot
-    dot_data = StringIO.StringIO() 
-    tree.export_graphviz(clf, out_file=dot_data) 
-    graph = pydot.graph_from_dot_data(dot_data.getvalue()) 
+    #clf.fit(data[features].tolist(), data[target])
+    #import pydot
+    #dot_data = StringIO.StringIO() 
+    #tree.export_graphviz(clf, out_file=dot_data) 
+    #graph = pydot.graph_from_dot_data(dot_data.getvalue()) 
     
-    graph.write_pdf("./ds.pdf")
+    #graph.write_pdf("./ds.pdf")
 
     #print clf.coef_, clf.alpha_, clf.lambda_, clf.intercept_
-    scores = np.array(cross_validation.cross_val_score(clf, data[features].tolist(), data[target], cv=5, scoring='mean_squared_error'))
-    print (-1 * scores), (-1  * scores.sum()/5)
-    continue
+    #scores = np.array(cross_validation.cross_val_score(clf, data[features].tolist(), data[target], cv=5, scoring='mean_squared_error'))
+    #print (-1 * scores), (-1  * scores.sum()/5)
+    #continue
     clf.fit(data[features].tolist(), data[target])
 
     #Prepare test data
     #testa, clust, enc, newCol = clusterData(testa, clusterFields, True, enc, clust, False)
-    #test = util.prepDataTest(test, features, True, fillVal, False, 'set')
+    test = util.prepDataTest(test, features, True, fillVal, False, 'set')
 
     #Get predictions
-    #pred = clf.predict(test[features].tolist())
-    pred1 = clf.predict(testa[features].tolist())
-    pred = clf.predict(data[features].tolist())
-    an.plotData(data[target], pred)
+    pred = clf.predict(test[features].tolist())
+    #pred1 = clf.predict(testa[features].tolist())
+    #pred = clf.predict(data[features].tolist())
+    #an.plotData(data[target], pred)
 
     #Store results
-    #df[target] = pred
-    #continue
+    df[target] = pred
+    continue
 
     print (((((testa[target] - pred1) ** 2).sum())/len(pred1))**.5)
     abse = pred - data[target]
